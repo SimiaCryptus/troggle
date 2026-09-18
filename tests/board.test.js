@@ -1,8 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  generateBoard, encodeSeed, parseSeed, dailySeed, boardFromSeedString,
-  assessQuality, everySubBlockHasVowel, defaultMinWordLength, VOWEL_RANGE,
+  generateBoard,
+  encodeSeed,
+  parseSeed,
+  dailySeed,
+  boardFromSeedString,
+  assessQuality,
+  everySubBlockHasVowel,
+  defaultMinWordLength,
+  VOWEL_RANGE,
 } from '../js/core/board.js';
 import { Grid } from '../js/core/grid.js';
 import { Trie } from '../js/core/trie.js';
@@ -51,7 +58,10 @@ test('dailySeed is stable per date/size/adjacency', () => {
   const d = new Date('2025-01-15T12:00:00Z');
   assert.equal(dailySeed(d, 4, 'corner'), dailySeed('2025-01-15', 4, 'corner'));
   assert.notEqual(dailySeed(d, 4, 'corner'), dailySeed(d, 5, 'corner'));
-  assert.notEqual(dailySeed(d, 4, 'corner'), dailySeed(new Date('2025-01-16T00:00:00Z'), 4, 'corner'));
+  assert.notEqual(
+    dailySeed(d, 4, 'corner'),
+    dailySeed(new Date('2025-01-16T00:00:00Z'), 4, 'corner')
+  );
 });
 
 test('defaultMinWordLength', () => {
@@ -65,7 +75,10 @@ test('quality gate holds over 100 seeds (geometry checks, no dictionary)', () =>
   for (let seed = 1; seed <= 100; seed++) {
     const board = generateBoard({ size: 4, seed, trie: null });
     const ratio = vowelRatio(board.letters);
-    assert.ok(ratio >= VOWEL_RANGE[0] && ratio <= VOWEL_RANGE[1], `seed ${seed} vowel ratio ${ratio}`);
+    assert.ok(
+      ratio >= VOWEL_RANGE[0] && ratio <= VOWEL_RANGE[1],
+      `seed ${seed} vowel ratio ${ratio}`
+    );
     assert.ok(board.attempts >= 1 && board.attempts <= 12);
     if (board.quality.ok) passed++;
   }
@@ -86,7 +99,18 @@ test('assessQuality reports individual failures', () => {
 });
 
 test('generateBoard with a dictionary attaches solved words and checks counts', () => {
-  const trie = Trie.fromWords(['tea', 'eat', 'ate', 'net', 'ten', 'one', 'ion', 'rat', 'tar', 'art']);
+  const trie = Trie.fromWords([
+    'tea',
+    'eat',
+    'ate',
+    'net',
+    'ten',
+    'one',
+    'ion',
+    'rat',
+    'tar',
+    'art',
+  ]);
   const board = generateBoard({ size: 4, seed: 42, trie, minWords: 1 });
   assert.ok(board.words instanceof Map);
   assert.equal(typeof board.quality.checks.wordCount, 'boolean');
@@ -97,12 +121,44 @@ test('generateBoard with a dictionary attaches solved words and checks counts', 
 test('game round: countdown → playing → results with scoring and misses', () => {
   let clock = 1_000_000;
   const now = () => clock;
-  const trie = Trie.fromWords(['cat', 'cot', 'dog', 'god', 'tag', 'act', 'does', 'dotes', 'sees', 'bees']);
-  const letters = ['C', 'A', 'T', 'D', 'O', 'G', 'B', 'B', 'B', ...Array(9).fill('E'), ...Array(9).fill('S')];
+  const trie = Trie.fromWords([
+    'cat',
+    'cot',
+    'dog',
+    'god',
+    'tag',
+    'act',
+    'does',
+    'dotes',
+    'sees',
+    'bees',
+  ]);
+  const letters = [
+    'C',
+    'A',
+    'T',
+    'D',
+    'O',
+    'G',
+    'B',
+    'B',
+    'B',
+    ...Array(9).fill('E'),
+    ...Array(9).fill('S'),
+  ];
   const grid = new Grid(3, letters);
   const { solve } = /** @type {any} */ (globalThis.__solver ?? {});
   void solve;
-  const board = { size: 3, adjacency: 'corner', seedString: 'test', minWordLength: 3, letters, grid, trie, words: null };
+  const board = {
+    size: 3,
+    adjacency: 'corner',
+    seedString: 'test',
+    minWordLength: 3,
+    letters,
+    grid,
+    trie,
+    words: null,
+  };
 
   const game = new Game({ duration: 10, countdown: 3, now, autoTick: false });
   const events = [];

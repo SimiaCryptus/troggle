@@ -6,8 +6,8 @@
  */
 
 export const ADJACENCY = Object.freeze({
-  FACE: 'face',     //  6 neighbours: |dx|+|dy|+|dz| === 1
-  EDGE: 'edge',     // 18 neighbours: face + edge (max 2 non-zero deltas)
+  FACE: 'face', //  6 neighbours: |dx|+|dy|+|dz| === 1
+  EDGE: 'edge', // 18 neighbours: face + edge (max 2 non-zero deltas)
   CORNER: 'corner', // 26 neighbours: everything in the 3x3x3 shell
 });
 
@@ -16,8 +16,7 @@ const DELTAS = (() => {
   const all = [];
   for (let dz = -1; dz <= 1; dz++)
     for (let dy = -1; dy <= 1; dy++)
-      for (let dx = -1; dx <= 1; dx++)
-        if (dx || dy || dz) all.push([dx, dy, dz]);
+      for (let dx = -1; dx <= 1; dx++) if (dx || dy || dz) all.push([dx, dy, dz]);
 
   const nonZero = ([dx, dy, dz]) => Math.abs(dx) + Math.abs(dy) + Math.abs(dz);
   return {
@@ -148,9 +147,12 @@ export class Grid {
 
     for (const idx of path) {
       this.coords(idx, c);
-      min.x = Math.min(min.x, c.x); max.x = Math.max(max.x, c.x);
-      min.y = Math.min(min.y, c.y); max.y = Math.max(max.y, c.y);
-      min.z = Math.min(min.z, c.z); max.z = Math.max(max.z, c.z);
+      min.x = Math.min(min.x, c.x);
+      max.x = Math.max(max.x, c.x);
+      min.y = Math.min(min.y, c.y);
+      max.y = Math.max(max.y, c.y);
+      min.z = Math.min(min.z, c.z);
+      max.z = Math.max(max.z, c.z);
       layers.add(c.z);
       if (allInterior && !this.isInterior(idx)) allInterior = false;
     }

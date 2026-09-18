@@ -23,7 +23,9 @@ export function attachPicker(view, selection) {
     onTap: (index) => selection.tap(index),
     onTapEmpty: () => selection.clear(),
   };
-  return () => { view.controls.hooks = {}; };
+  return () => {
+    view.controls.hooks = {};
+  };
 }
 
 export default attachPicker;

@@ -26,7 +26,9 @@ export function loadSettings() {
 export function saveSettings(settings) {
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-  } catch { /* private mode */ }
+  } catch {
+    /* private mode */
+  }
 }
 
 export function loadStats() {
@@ -52,7 +54,9 @@ export function recordRound(results) {
       ...(stats.history ?? []),
     ].slice(0, 30);
     localStorage.setItem(STATS_KEY, JSON.stringify(stats));
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 /**

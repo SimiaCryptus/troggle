@@ -13,7 +13,15 @@ import { solve, findPath, findAllPaths, hasPath } from '../js/core/solver.js';
  *   B B B      E E E      S S S
  */
 const LETTERS = [
-  'C', 'A', 'T', 'D', 'O', 'G', 'B', 'B', 'B',
+  'C',
+  'A',
+  'T',
+  'D',
+  'O',
+  'G',
+  'B',
+  'B',
+  'B',
   ...Array(9).fill('E'),
   ...Array(9).fill('S'),
 ];

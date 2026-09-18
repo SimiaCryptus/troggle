@@ -7,12 +7,22 @@
  */
 
 const MOVE = {
-  ArrowLeft: [-1, 0, 0], a: [-1, 0, 0], A: [-1, 0, 0],
-  ArrowRight: [1, 0, 0], d: [1, 0, 0], D: [1, 0, 0],
-  ArrowUp: [0, -1, 0], w: [0, -1, 0], W: [0, -1, 0],
-  ArrowDown: [0, 1, 0], s: [0, 1, 0], S: [0, 1, 0],
-  q: [0, 0, -1], Q: [0, 0, -1],
-  e: [0, 0, 1], E: [0, 0, 1],
+  ArrowLeft: [-1, 0, 0],
+  a: [-1, 0, 0],
+  A: [-1, 0, 0],
+  ArrowRight: [1, 0, 0],
+  d: [1, 0, 0],
+  D: [1, 0, 0],
+  ArrowUp: [0, -1, 0],
+  w: [0, -1, 0],
+  W: [0, -1, 0],
+  ArrowDown: [0, 1, 0],
+  s: [0, 1, 0],
+  S: [0, 1, 0],
+  q: [0, 0, -1],
+  Q: [0, 0, -1],
+  e: [0, 0, 1],
+  E: [0, 0, 1],
 };
 
 export class KeyboardPlay {
@@ -85,7 +95,7 @@ export class KeyboardPlay {
     const c = this.cursor;
     const letter = this.grid.letterAt(this.index);
     this.announce(
-      `Layer ${c.z + 1}, row ${c.y + 1}, column ${c.x + 1}, letter ${letter}${suffix ? `, ${suffix}` : ''}.`,
+      `Layer ${c.z + 1}, row ${c.y + 1}, column ${c.x + 1}, letter ${letter}${suffix ? `, ${suffix}` : ''}.`
     );
   }
 

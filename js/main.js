@@ -197,12 +197,18 @@ function badges(score) {
 
 function missText(reason, word) {
   switch (reason) {
-    case REASON.NOT_A_WORD: return 'not a word';
-    case REASON.NO_PATH: return 'not on the cube';
-    case REASON.ALREADY_FOUND: return 'already found';
-    case REASON.TOO_SHORT: return `${game.minWordLength}+ letters`;
-    case REASON.BAD_PATH: return 'broken path';
-    default: return word ? 'nope' : 'empty';
+    case REASON.NOT_A_WORD:
+      return 'not a word';
+    case REASON.NO_PATH:
+      return 'not on the cube';
+    case REASON.ALREADY_FOUND:
+      return 'already found';
+    case REASON.TOO_SHORT:
+      return `${game.minWordLength}+ letters`;
+    case REASON.BAD_PATH:
+      return 'broken path';
+    default:
+      return word ? 'nope' : 'empty';
   }
 }
 
@@ -219,14 +225,23 @@ function preview(path, ms = 1600) {
   }, ms);
 }
 function clearPreview() {
-  if (previewTimer) { clearTimeout(previewTimer); previewTimer = null; }
+  if (previewTimer) {
+    clearTimeout(previewTimer);
+    previewTimer = null;
+  }
 }
 
 // -------------------------------------------------------------- HUD wiring
 
 hud.bind({
   onSubmit: submitTyped,
-  onClear: () => { selection?.clear(); hud.setInput(''); hud.setInputStatus(null); view.setPath([], null); hud.setChips([]); },
+  onClear: () => {
+    selection?.clear();
+    hud.setInput('');
+    hud.setInputStatus(null);
+    view.setPath([], null);
+    hud.setChips([]);
+  },
   onType: onTyping,
   onReplay: (entry) => preview(entry.path),
   onMenu: () => lobby(),
@@ -252,7 +267,10 @@ function toggleMic() {
         for (const v of variantsFor(token)) {
           if (v.length < game.minWordLength) continue;
           const res = game.submitWord(v);
-          if (res.ok) { done = true; break; }
+          if (res.ok) {
+            done = true;
+            break;
+          }
         }
         if (!done) game.submitWord(token);
       }
@@ -268,15 +286,18 @@ if (!Speech.supported) hud.hideMic();
 
 window.addEventListener('keydown', (e) => {
   const typing = document.activeElement === hud.input;
-   if (e.key === 'Enter') {
-     if (typing) return; // the field's own keydown handler submits (avoid double submit)
-     e.preventDefault();
-     submitTyped();
-     return;
-   }
+  if (e.key === 'Enter') {
+    if (typing) return; // the field's own keydown handler submits (avoid double submit)
+    e.preventDefault();
+    submitTyped();
+    return;
+  }
   if (e.key === 'Escape') {
     selection?.clear();
-    hud.setInput(''); hud.setInputStatus(null); view.setPath([], null); hud.setChips([]);
+    hud.setInput('');
+    hud.setInputStatus(null);
+    view.setPath([], null);
+    hud.setChips([]);
     hud.input.blur();
     return;
   }
@@ -284,17 +305,28 @@ window.addEventListener('keydown', (e) => {
   if (typing && /^[a-zA-Z]$/.test(e.key)) return; // let the field have letters
 
   switch (e.key) {
-    case 'x': case 'X': {
+    case 'x':
+    case 'X': {
       const v = view.effects.peelTarget > 0 ? 0 : 0.45;
       view.effects.setPeel(v);
       hud.setPeel(v);
       break;
     }
-    case '1': view.controls.snap('front'); break;
-    case '2': view.controls.snap('top'); break;
-    case '3': view.controls.snap('iso'); break;
-    case 'm': case 'M': if (!typing) lobby(); break;
-    default: return;
+    case '1':
+      view.controls.snap('front');
+      break;
+    case '2':
+      view.controls.snap('top');
+      break;
+    case '3':
+      view.controls.snap('iso');
+      break;
+    case 'm':
+    case 'M':
+      if (!typing) lobby();
+      break;
+    default:
+      return;
   }
   e.preventDefault();
 });
@@ -334,9 +366,15 @@ newRound();
 // Expose a tiny handle for debugging / the console.
 Object.assign(globalThis, {
   troggle: {
-    get board() { return board; },
-    game, view, hud,
-    get seed() { return board && encodeSeed(board); },
+    get board() {
+      return board;
+    },
+    game,
+    view,
+    hud,
+    get seed() {
+      return board && encodeSeed(board);
+    },
     newRound,
   },
 });

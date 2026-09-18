@@ -6,9 +6,9 @@
  *   hooks.onTap(index)          single click/tap on a cube
  *   hooks.onTapEmpty()          click/tap on the background
  *
-* Trail-drag selection is off (it fought the orbit gesture): *every* drag
-* orbits, wherever it starts, and only a tap selects. Right/middle drag pans
-* anywhere, two fingers pinch-zoom + pan.
+ * Trail-drag selection is off (it fought the orbit gesture): *every* drag
+ * orbits, wherever it starts, and only a tap selects. Right/middle drag pans
+ * anywhere, two fingers pinch-zoom + pan.
  */
 
 import * as THREE from 'three';
@@ -148,7 +148,7 @@ export class CameraControls {
   }
 
   pan(dx, dy) {
-    const scale = (this.distance * 0.0022);
+    const scale = this.distance * 0.0022;
     const right = this._scratch.set(Math.cos(this.theta), 0, -Math.sin(this.theta));
     this.target.addScaledVector(right, -dx * scale);
     this.target.y += dy * scale;
@@ -169,8 +169,15 @@ export class CameraControls {
       return;
     }
     this._tween = {
-      t: 0, ms,
-      from: { theta: this.theta, phi: this.phi, tx: this.target.x, ty: this.target.y, tz: this.target.z },
+      t: 0,
+      ms,
+      from: {
+        theta: this.theta,
+        phi: this.phi,
+        tx: this.target.x,
+        ty: this.target.y,
+        tz: this.target.z,
+      },
       to: goal,
     };
   }
@@ -207,7 +214,7 @@ export class CameraControls {
     this.camera.position.set(
       this.target.x + this.distance * sp * Math.sin(this.theta),
       this.target.y + this.distance * Math.cos(this.phi),
-      this.target.z + this.distance * sp * Math.cos(this.theta),
+      this.target.z + this.distance * sp * Math.cos(this.theta)
     );
     this.camera.lookAt(this.target);
   }

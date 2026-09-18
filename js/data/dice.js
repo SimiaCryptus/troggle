@@ -16,9 +16,32 @@ import { mulberry32, hashString } from '../core/rng.js';
 
 /** English-ish letter weights, tuned for a ~36% vowel ratio on rolled faces. */
 export const LETTER_WEIGHTS = Object.freeze({
-  A: 7, B: 2, C: 3, D: 4, E: 10, F: 2, G: 3, H: 3, I: 7, J: 1, K: 1, L: 5,
-  M: 3, N: 6, O: 6, P: 3, Qu: 1, R: 6, S: 5, T: 6, U: 4, V: 1, W: 2, X: 1,
-  Y: 2, Z: 1,
+  A: 7,
+  B: 2,
+  C: 3,
+  D: 4,
+  E: 10,
+  F: 2,
+  G: 3,
+  H: 3,
+  I: 7,
+  J: 1,
+  K: 1,
+  L: 5,
+  M: 3,
+  N: 6,
+  O: 6,
+  P: 3,
+  Qu: 1,
+  R: 6,
+  S: 5,
+  T: 6,
+  U: 4,
+  V: 1,
+  W: 2,
+  X: 1,
+  Y: 2,
+  Z: 1,
 });
 
 export const VOWELS = Object.freeze(['A', 'E', 'I', 'O', 'U']);
@@ -83,7 +106,10 @@ export function makeDie(rng) {
     let r = rng() * total;
     let v = VOWELS[VOWELS.length - 1];
     for (let i = 0; i < VOWELS.length; i++) {
-      if (r < vw[i]) { v = VOWELS[i]; break; }
+      if (r < vw[i]) {
+        v = VOWELS[i];
+        break;
+      }
       r -= vw[i];
     }
     faces[Math.floor(rng() * FACES_PER_DIE)] = v;

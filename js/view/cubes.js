@@ -1,19 +1,19 @@
 /**
  * cubes.js — the block itself (§5.2, §14).
  *
-* *Letters only.* The block is a cloud of opaque, camera-facing glyphs floating
-* at the cube centres (glyph atlas + per-instance UV offset). The glass cell
-* meshes are still built (same shader, same tier bookkeeping) but they are not
-* added to the scene by default — nothing occludes a letter, and nothing can be
-* clicked except a letter. The glyphs write depth, so front letters occlude
-* back letters, and letters deeper than the block centre shrink/fade slightly
-* so 5³/6³ stay legible.
-*
-* Picking (§4.1) therefore happens against the glyph quads in screen space:
-* pickLetter() finds the glyph whose rendered pixels contain the pointer (with
-* a small slop so near-misses still land), nearest-to-camera first. Faint
-* letters (sliced-away layers) are not pickable unless they are "preferred"
-* (i.e. the player is backtracking along their own path).
+ * *Letters only.* The block is a cloud of opaque, camera-facing glyphs floating
+ * at the cube centres (glyph atlas + per-instance UV offset). The glass cell
+ * meshes are still built (same shader, same tier bookkeeping) but they are not
+ * added to the scene by default — nothing occludes a letter, and nothing can be
+ * clicked except a letter. The glyphs write depth, so front letters occlude
+ * back letters, and letters deeper than the block centre shrink/fade slightly
+ * so 5³/6³ stay legible.
+ *
+ * Picking (§4.1) therefore happens against the glyph quads in screen space:
+ * pickLetter() finds the glyph whose rendered pixels contain the pointer (with
+ * a small slop so near-misses still land), nearest-to-camera first. Faint
+ * letters (sliced-away layers) are not pickable unless they are "preferred"
+ * (i.e. the player is backtracking along their own path).
  *
  * Effects/renderer write *targets*; update(dt) eases toward them and rebuilds
  * the instance buffers with pre-allocated scratch objects (no per-frame allocs).
@@ -135,13 +135,13 @@ export class CubeField {
   /**
    * @param {import('../core/grid.js').Grid} grid
    */
-   constructor(grid, { spacing = 1.16, cubeSize = 1, atlas = null, showCubes = false } = {}) {
+  constructor(grid, { spacing = 1.16, cubeSize = 1, atlas = null, showCubes = false } = {}) {
     this.grid = grid;
     this.count = grid.count;
     this.spacing = spacing;
     this.cubeSize = cubeSize;
     this.atlas = atlas ?? createAtlas();
-     this.showCubes = showCubes;
+    this.showCubes = showCubes;
     this.group = new THREE.Group();
 
     const n = this.count;
@@ -166,14 +166,13 @@ export class CubeField {
     this.pickGhost = false;
     this._flash = new Float32Array(n);
     this._ghostLetters = new Int32Array(n);
-     // Glyph-quad pick data, refilled every frame (the letters are the only
-     // pickable thing now).
-     this.letterCount = 0;
-     this.letterIndex = new Int32Array(n);
-     this.letterPos = new Float32Array(n * 3);
-     this.letterScale = new Float32Array(n);
-     this.letterAlpha = new Float32Array(n);
-
+    // Glyph-quad pick data, refilled every frame (the letters are the only
+    // pickable thing now).
+    this.letterCount = 0;
+    this.letterIndex = new Int32Array(n);
+    this.letterPos = new Float32Array(n * 3);
+    this.letterScale = new Float32Array(n);
+    this.letterAlpha = new Float32Array(n);
 
     // cube centres, block centred on the origin; grid y grows downward
     const off = (grid.size - 1) / 2;
@@ -187,9 +186,9 @@ export class CubeField {
 
     this.solid = this._makeMesh(false);
     this.ghost = this._makeMesh(true);
-     this.solid.visible = this.showCubes;
-     this.ghost.visible = this.showCubes;
-     if (this.showCubes) this.group.add(this.solid, this.ghost);
+    this.solid.visible = this.showCubes;
+    this.ghost.visible = this.showCubes;
+    if (this.showCubes) this.group.add(this.solid, this.ghost);
 
     this.solidPick = new Int32Array(n).fill(-1);
     this.ghostPick = new Int32Array(n).fill(-1);
@@ -260,7 +259,7 @@ export class CubeField {
       vertexShader: LETTER_VERT,
       fragmentShader: LETTER_FRAG,
       transparent: true,
-      depthWrite: true,   // front letters occlude back letters
+      depthWrite: true, // front letters occlude back letters
       depthTest: true,
       toneMapped: false,
     });
@@ -281,9 +280,13 @@ export class CubeField {
    */
   setTarget(i, s) {
     _c.set(s.color);
-    this.tgtColor[i * 3] = _c.r; this.tgtColor[i * 3 + 1] = _c.g; this.tgtColor[i * 3 + 2] = _c.b;
+    this.tgtColor[i * 3] = _c.r;
+    this.tgtColor[i * 3 + 1] = _c.g;
+    this.tgtColor[i * 3 + 2] = _c.b;
     _c.set(s.letter);
-    this.tgtLetter[i * 3] = _c.r; this.tgtLetter[i * 3 + 1] = _c.g; this.tgtLetter[i * 3 + 2] = _c.b;
+    this.tgtLetter[i * 3] = _c.r;
+    this.tgtLetter[i * 3 + 1] = _c.g;
+    this.tgtLetter[i * 3 + 2] = _c.b;
     this.tgtScale[i] = s.scale;
     this.tgtAlpha[i] = s.alpha;
     this.tgtGlow[i] = s.glow ?? 0;
@@ -318,12 +321,12 @@ export class CubeField {
     return out.set(
       this.base[i * 3] + this.offset[i * 3],
       this.base[i * 3 + 1] + this.offset[i * 3 + 1],
-      this.base[i * 3 + 2] + this.offset[i * 3 + 2],
+      this.base[i * 3 + 2] + this.offset[i * 3 + 2]
     );
   }
 
   pickTargets() {
-     if (!this.showCubes) return [];
+    if (!this.showCubes) return [];
     return this.pickGhost ? [this.solid, this.ghost] : [this.solid];
   }
 
@@ -332,94 +335,109 @@ export class CubeField {
     if (!map || instanceId == null || instanceId < 0) return -1;
     return map[instanceId] ?? -1;
   }
-   /**
-    * Cube index whose *glyph* is under a canvas-space pixel, or -1.
-    *
-    * Screen-space test against the letter quads: a glyph that contains the
-    * point wins (nearest to camera first), otherwise the closest near-miss
-    * within PICK_SLOP wins, so tapping "between" letters still resolves to the
-    * letter you meant. Indices in `prefer` (legal next cubes, the head/tail of
-    * the current path) beat everything else, which is how you reach an interior
-    * letter you can see behind a front one.
-    *
-    * @param {number} px            pointer x in canvas pixels
-    * @param {number} py            pointer y in canvas pixels
-    * @param {number} width         canvas css width
-    * @param {number} height        canvas css height
-    * @param {THREE.PerspectiveCamera} camera
-    * @param {Set<number>|null} [prefer]
-    * @returns {number} cube index, or -1
-    */
-   pickLetter(px, py, width, height, camera, prefer = null) {
-     const pxPerUnitAtUnitDepth = height / (2 * Math.tan((camera.fov * Math.PI) / 360));
-     let hit = -1, hitDepth = Infinity;
-     let hitPref = -1, hitPrefDepth = Infinity;
-     let near = -1, nearScore = Infinity;
-     let nearPref = -1, nearPrefScore = Infinity;
-     for (let k = 0; k < this.letterCount; k++) {
-       const i = this.letterIndex[k];
-       const preferred = prefer ? prefer.has(i) : false;
-       if (!preferred && this.letterAlpha[k] < PICK_MIN_ALPHA) continue;
-       _proj.set(this.letterPos[k * 3], this.letterPos[k * 3 + 1], this.letterPos[k * 3 + 2]);
-       const depth = _proj.distanceTo(camera.position);
-       _proj.project(camera);
-       if (!(_proj.z >= -1 && _proj.z <= 1)) continue;   // behind / outside frustum
-       const sx = (_proj.x * 0.5 + 0.5) * width;
-       const sy = (-_proj.y * 0.5 + 0.5) * height;
-       const half = (this.letterScale[k] * 0.5 * pxPerUnitAtUnitDepth) / Math.max(1e-3, depth);
-       const dx = Math.abs(px - sx);
-       const dy = Math.abs(py - sy);
-       if (dx <= half * GLYPH_HIT && dy <= half * GLYPH_HIT) {
-         if (preferred) {
-           if (depth < hitPrefDepth) { hitPref = i; hitPrefDepth = depth; }
-         } else if (depth < hitDepth) { hit = i; hitDepth = depth; }
-         continue;
-       }
-       const slop = half * PICK_SLOP;
-       const d = Math.max(dx, dy) / Math.max(1e-3, slop);
-       if (d <= 1) {
-         const score = d + depth * 1e-4;
-         if (preferred) {
-           if (score < nearPrefScore) { nearPref = i; nearPrefScore = score; }
-         } else if (score < nearScore) { near = i; nearScore = score; }
-       }
-     }
-     if (hitPref >= 0) return hitPref;
-     if (hit >= 0) return hit;
-     if (nearPref >= 0) return nearPref;
-     return near;
-   }
-
+  /**
+   * Cube index whose *glyph* is under a canvas-space pixel, or -1.
+   *
+   * Screen-space test against the letter quads: a glyph that contains the
+   * point wins (nearest to camera first), otherwise the closest near-miss
+   * within PICK_SLOP wins, so tapping "between" letters still resolves to the
+   * letter you meant. Indices in `prefer` (legal next cubes, the head/tail of
+   * the current path) beat everything else, which is how you reach an interior
+   * letter you can see behind a front one.
+   *
+   * @param {number} px            pointer x in canvas pixels
+   * @param {number} py            pointer y in canvas pixels
+   * @param {number} width         canvas css width
+   * @param {number} height        canvas css height
+   * @param {THREE.PerspectiveCamera} camera
+   * @param {Set<number>|null} [prefer]
+   * @returns {number} cube index, or -1
+   */
+  pickLetter(px, py, width, height, camera, prefer = null) {
+    const pxPerUnitAtUnitDepth = height / (2 * Math.tan((camera.fov * Math.PI) / 360));
+    let hit = -1,
+      hitDepth = Infinity;
+    let hitPref = -1,
+      hitPrefDepth = Infinity;
+    let near = -1,
+      nearScore = Infinity;
+    let nearPref = -1,
+      nearPrefScore = Infinity;
+    for (let k = 0; k < this.letterCount; k++) {
+      const i = this.letterIndex[k];
+      const preferred = prefer ? prefer.has(i) : false;
+      if (!preferred && this.letterAlpha[k] < PICK_MIN_ALPHA) continue;
+      _proj.set(this.letterPos[k * 3], this.letterPos[k * 3 + 1], this.letterPos[k * 3 + 2]);
+      const depth = _proj.distanceTo(camera.position);
+      _proj.project(camera);
+      if (!(_proj.z >= -1 && _proj.z <= 1)) continue; // behind / outside frustum
+      const sx = (_proj.x * 0.5 + 0.5) * width;
+      const sy = (-_proj.y * 0.5 + 0.5) * height;
+      const half = (this.letterScale[k] * 0.5 * pxPerUnitAtUnitDepth) / Math.max(1e-3, depth);
+      const dx = Math.abs(px - sx);
+      const dy = Math.abs(py - sy);
+      if (dx <= half * GLYPH_HIT && dy <= half * GLYPH_HIT) {
+        if (preferred) {
+          if (depth < hitPrefDepth) {
+            hitPref = i;
+            hitPrefDepth = depth;
+          }
+        } else if (depth < hitDepth) {
+          hit = i;
+          hitDepth = depth;
+        }
+        continue;
+      }
+      const slop = half * PICK_SLOP;
+      const d = Math.max(dx, dy) / Math.max(1e-3, slop);
+      if (d <= 1) {
+        const score = d + depth * 1e-4;
+        if (preferred) {
+          if (score < nearPrefScore) {
+            nearPref = i;
+            nearPrefScore = score;
+          }
+        } else if (score < nearScore) {
+          near = i;
+          nearScore = score;
+        }
+      }
+    }
+    if (hitPref >= 0) return hitPref;
+    if (hit >= 0) return hit;
+    if (nearPref >= 0) return nearPref;
+    return near;
+  }
 
   // -------------------------------------------------------------- update
 
   _writeLetter(slot, i, p, scale, alpha) {
     const uv = this.atlas.get(this.grid.letterAt(i));
-     const worldScale = scale * this.cubeSize * 0.84;
+    const worldScale = scale * this.cubeSize * 0.84;
     this._aOffset.setXYZ(slot, p.x, p.y, p.z);
     this._aUv.setXYZW(slot, uv[0], uv[1], uv[2], uv[3]);
     this._aColor.setXYZ(
       slot,
       this.curLetter[i * 3],
       this.curLetter[i * 3 + 1],
-      this.curLetter[i * 3 + 2],
+      this.curLetter[i * 3 + 2]
     );
     this._aAlpha.setX(slot, alpha);
-     this._aScale.setX(slot, worldScale);
+    this._aScale.setX(slot, worldScale);
 
-     // mirror into the pick arrays
-     this.letterIndex[slot] = i;
-     this.letterPos[slot * 3] = p.x;
-     this.letterPos[slot * 3 + 1] = p.y;
-     this.letterPos[slot * 3 + 2] = p.z;
-     this.letterScale[slot] = worldScale;
-     this.letterAlpha[slot] = alpha;
+    // mirror into the pick arrays
+    this.letterIndex[slot] = i;
+    this.letterPos[slot * 3] = p.x;
+    this.letterPos[slot * 3 + 1] = p.y;
+    this.letterPos[slot * 3 + 2] = p.z;
+    this.letterScale[slot] = worldScale;
+    this.letterAlpha[slot] = alpha;
   }
 
   update(dt) {
     const k = 1 - Math.exp(-dt * 14);
     const ks = 1 - Math.exp(-dt * 18);
-     const drawCubes = this.showCubes;
+    const drawCubes = this.showCubes;
     let solidN = 0;
     let ghostN = 0;
     let letterN = 0;
@@ -465,20 +483,20 @@ export class CubeField {
       const glow = Math.max(this.curGlow[i], f);
 
       if (tier === TIER_SOLID) {
-         if (drawCubes) {
-           this.solid.setMatrixAt(solidN, _m);
-           this.solid.instanceColor.setXYZ(solidN, r, g, b);
-           solidGlow.setX(solidN, glow);
-           this.solidPick[solidN] = i;
-         }
+        if (drawCubes) {
+          this.solid.setMatrixAt(solidN, _m);
+          this.solid.instanceColor.setXYZ(solidN, r, g, b);
+          solidGlow.setX(solidN, glow);
+          this.solidPick[solidN] = i;
+        }
         solidN++;
       } else {
-         if (drawCubes) {
-           this.ghost.setMatrixAt(ghostN, _m);
-           this.ghost.instanceColor.setXYZ(ghostN, r, g, b);
-           ghostGlow.setX(ghostN, glow);
-           this.ghostPick[ghostN] = i;
-         }
+        if (drawCubes) {
+          this.ghost.setMatrixAt(ghostN, _m);
+          this.ghost.instanceColor.setXYZ(ghostN, r, g, b);
+          ghostGlow.setX(ghostN, glow);
+          this.ghostPick[ghostN] = i;
+        }
         ghostN++;
       }
 
@@ -497,18 +515,18 @@ export class CubeField {
       this._writeLetter(letterN++, i, _p, this.curScale[i], this.curAlpha[i]);
     }
 
-     if (drawCubes) {
-       this.solid.count = solidN;
-       this.ghost.count = ghostN;
-       this.solid.instanceMatrix.needsUpdate = true;
-       this.ghost.instanceMatrix.needsUpdate = true;
-       this.solid.instanceColor.needsUpdate = true;
-       this.ghost.instanceColor.needsUpdate = true;
-       solidGlow.needsUpdate = true;
-       ghostGlow.needsUpdate = true;
-     }
+    if (drawCubes) {
+      this.solid.count = solidN;
+      this.ghost.count = ghostN;
+      this.solid.instanceMatrix.needsUpdate = true;
+      this.ghost.instanceMatrix.needsUpdate = true;
+      this.solid.instanceColor.needsUpdate = true;
+      this.ghost.instanceColor.needsUpdate = true;
+      solidGlow.needsUpdate = true;
+      ghostGlow.needsUpdate = true;
+    }
 
-     this.letterCount = letterN;
+    this.letterCount = letterN;
     this.letterGeometry.instanceCount = letterN;
     this._aOffset.needsUpdate = true;
     this._aUv.needsUpdate = true;

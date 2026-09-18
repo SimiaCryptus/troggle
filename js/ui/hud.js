@@ -52,7 +52,10 @@ export class Hud {
 
     this.input.addEventListener('input', () => on.onType?.(this.input.value));
     this.input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); on.onSubmit?.(); }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        on.onSubmit?.();
+      }
     });
 
     $('found-summary').addEventListener('click', () => {
@@ -67,8 +70,7 @@ export class Hud {
   setBoard(board) {
     this.title.textContent = `Troggle ${board.size}³`;
     this.setPeel(0);
-    this.hintLine.textContent =
-      `${board.minWordLength}+ letters · tap letters to spell · peel to see inside`;
+    this.hintLine.textContent = `${board.minWordLength}+ letters · tap letters to spell · peel to see inside`;
   }
 
   reset() {
@@ -163,10 +165,18 @@ export class Hud {
 
   // ---------------------------------------------------------------- input
 
-  inputValue() { return this.input.value; }
-  setInput(v) { this.input.value = v; }
-  focusInput() { if (!this.input.disabled) this.input.focus(); }
-  selectInput() { this.input.select?.(); }
+  inputValue() {
+    return this.input.value;
+  }
+  setInput(v) {
+    this.input.value = v;
+  }
+  focusInput() {
+    if (!this.input.disabled) this.input.focus();
+  }
+  selectInput() {
+    this.input.select?.();
+  }
 
   setInputStatus(cls) {
     this.input.classList.remove('is-word', 'is-path', 'is-none');
@@ -185,8 +195,6 @@ export class Hud {
   }
 
   // ------------------------------------------------------------ view tools
-
-
 
   setPeel(v) {
     const pct = Math.round(Math.max(0, Math.min(1, Number(v) || 0)) * 100);

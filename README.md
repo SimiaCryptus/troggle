@@ -19,13 +19,13 @@ picked apart.
 ## The idea in a bit more depth
 
 Ordinary Boggle is a solved problem for your eyes: you can see the whole
-board at once. The entire design challenge of Troggle is that you *can't* —
+board at once. The entire design challenge of Troggle is that you _can't_ —
 a 6-cube-wide block hides a 4-cube-wide block inside it, and that inner block
 hides its own words just as well as the outer shell does. So the game is
 really two puzzles layered on top of each other:
 
 1. The word puzzle — the same one you already know from Boggle.
-2. The *seeing* puzzle — how do you even perceive a word path that curls
+2. The _seeing_ puzzle — how do you even perceive a word path that curls
    through the inside of a solid block of letters?
 
 Troggle's answer to the second puzzle is a handful of simple tools rather
@@ -79,7 +79,7 @@ you reward a player for using the extra space well rather than ignoring it.
   cursor, and it works reasonably well however you approach it.
 - Anyone curious about game design as an exercise in translation — taking a
   classic mechanic and rebuilding just enough new furniture around it (here,
-  mostly ways of *seeing*) to let it survive the jump to three dimensions.
+  mostly ways of _seeing_) to let it survive the jump to three dimensions.
 - Casual players looking for a quick, timed, no-stakes brain-warmer: round
   lengths run from a minute and a half to ten minutes, and a shareable
   "Daily Cube" seed means everyone can compare notes on the same board.

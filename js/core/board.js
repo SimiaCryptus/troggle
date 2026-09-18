@@ -72,12 +72,16 @@ export function everySubBlockHasVowel(grid) {
  * Run every check from §3.3. Word checks are skipped when `words` is null
  * (no dictionary available, e.g. M1 or tests).
  */
-export function assessQuality(grid, words, {
-  minWords = MIN_WORDS[grid.size] ?? 0,
-  vowelRange = VOWEL_RANGE,
-  longWordLength = LONG_WORD_LENGTH,
-  minLongWords = MIN_LONG_WORDS,
-} = {}) {
+export function assessQuality(
+  grid,
+  words,
+  {
+    minWords = MIN_WORDS[grid.size] ?? 0,
+    vowelRange = VOWEL_RANGE,
+    longWordLength = LONG_WORD_LENGTH,
+    minLongWords = MIN_LONG_WORDS,
+  } = {}
+) {
   const checks = {};
   const ratio = vowelRatio(grid.letters);
   checks.vowelRatio = ratio >= vowelRange[0] && ratio <= vowelRange[1];
@@ -182,6 +186,11 @@ export function boardFromSeedString(str, opts = {}) {
 }
 
 /** Today's Daily Cube. */
-export function dailyBoard({ date = new Date(), size = 4, adjacency = ADJACENCY.CORNER, ...opts } = {}) {
+export function dailyBoard({
+  date = new Date(),
+  size = 4,
+  adjacency = ADJACENCY.CORNER,
+  ...opts
+} = {}) {
   return generateBoard({ ...opts, size, adjacency, seed: dailySeed(date, size, adjacency) });
 }

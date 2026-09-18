@@ -23,7 +23,9 @@ function shareText(results) {
     `${found}/${possible} words · best ${results.best ? results.best.word.toUpperCase() : '—'}`,
     grid,
     results.seedString ?? '',
-  ].filter(Boolean).join('\n');
+  ]
+    .filter(Boolean)
+    .join('\n');
 }
 
 export function showResults(results, { onAgain, onLobby, onReplay } = {}) {
@@ -68,8 +70,14 @@ export function showResults(results, { onAgain, onLobby, onReplay } = {}) {
   const again = $('btn-again');
   const share = $('btn-share');
   const lobby = $('btn-lobby');
-  again.onclick = () => { dlg.close(); onAgain?.(); };
-  lobby.onclick = () => { dlg.close(); onLobby?.(); };
+  again.onclick = () => {
+    dlg.close();
+    onAgain?.();
+  };
+  lobby.onclick = () => {
+    dlg.close();
+    onLobby?.();
+  };
   share.onclick = async () => {
     const text = shareText(results);
     try {
@@ -79,7 +87,9 @@ export function showResults(results, { onAgain, onLobby, onReplay } = {}) {
     } catch {
       share.textContent = 'copy failed';
     }
-    setTimeout(() => { share.textContent = 'Share'; }, 1600);
+    setTimeout(() => {
+      share.textContent = 'Share';
+    }, 1600);
   };
 
   if (!dlg.open) dlg.showModal();

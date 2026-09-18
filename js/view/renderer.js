@@ -48,7 +48,7 @@ export class View {
     this._v3 = new THREE.Vector3();
     this._points = [];
     this._path = [];
-     this._linePeel = 0;
+    this._linePeel = 0;
     this._clock = new THREE.Clock();
     this._running = false;
     this._loop = () => this._frame();
@@ -98,7 +98,7 @@ export class View {
     pts.length = 0;
     for (const i of this._path) pts.push(this.cubes.centerOf(i, new THREE.Vector3()));
     this.pathline.setPoints(pts);
-     this._linePeel = this.effects ? this.effects.peel : 0;
+    this._linePeel = this.effects ? this.effects.peel : 0;
   }
 
   flash(index) {
@@ -120,27 +120,27 @@ export class View {
 
   // -------------------------------------------------------------- picking
 
-   /**
-     * Cube whose *letter* is under the pointer. The cube shells are not drawn at
-     * all, so only glyph pixels (plus a small snap radius) are clickable — no
-     * more accidental hits on the empty space between letters. When `prefer` is
-     * given (legal next cubes, path head/tail) those glyphs win, so you can
-     * reach an interior letter you can see behind a front one.
-    * @param {Set<number>|null} [prefer]
-    * @returns {number|null}
-    */
-   hitTest(clientX, clientY, prefer = null) {
+  /**
+   * Cube whose *letter* is under the pointer. The cube shells are not drawn at
+   * all, so only glyph pixels (plus a small snap radius) are clickable — no
+   * more accidental hits on the empty space between letters. When `prefer` is
+   * given (legal next cubes, path head/tail) those glyphs win, so you can
+   * reach an interior letter you can see behind a front one.
+   * @param {Set<number>|null} [prefer]
+   * @returns {number|null}
+   */
+  hitTest(clientX, clientY, prefer = null) {
     if (!this.cubes) return null;
     const r = this.canvas.getBoundingClientRect();
-     const idx = this.cubes.pickLetter(
-       clientX - r.left,
-       clientY - r.top,
-       r.width,
-       r.height,
-       this.camera,
-       prefer,
+    const idx = this.cubes.pickLetter(
+      clientX - r.left,
+      clientY - r.top,
+      r.width,
+      r.height,
+      this.camera,
+      prefer
     );
-     return idx < 0 ? null : idx;
+    return idx < 0 ? null : idx;
   }
 
   // ----------------------------------------------------------------- loop
@@ -169,12 +169,16 @@ export class View {
   _frame() {
     const dt = Math.min(0.05, this._clock.getDelta());
     this.controls.update(dt);
-     if (this.cubes) this.cubes.setViewDistance(this.camera.position.length());
+    if (this.cubes) this.cubes.setViewDistance(this.camera.position.length());
     if (this.effects) this.effects.update(dt);
-     // The tube follows the cubes while (and only while) the peel is moving.
-     if (this._path.length > 1 && this.effects && Math.abs(this.effects.peel - this._linePeel) > 1e-4) {
-       this._rebuildLine();
-     }
+    // The tube follows the cubes while (and only while) the peel is moving.
+    if (
+      this._path.length > 1 &&
+      this.effects &&
+      Math.abs(this.effects.peel - this._linePeel) > 1e-4
+    ) {
+      this._rebuildLine();
+    }
     this.pathline.update(dt);
     this.renderer.render(this.scene, this.camera);
   }

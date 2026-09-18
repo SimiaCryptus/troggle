@@ -8,26 +8,53 @@
 const SR = globalThis.SpeechRecognition || globalThis.webkitSpeechRecognition;
 
 /** Common ASR slips worth trying as alternatives. */
-const HOMOPHONES = new Map(Object.entries({
-  to: ['too', 'two'], too: ['to', 'two'], two: ['to', 'too'],
-  for: ['four', 'fore'], four: ['for', 'fore'], fore: ['for', 'four'],
-  ate: ['eight'], eight: ['ate'],
-  won: ['one'], one: ['won'],
-  sea: ['see'], see: ['sea'],
-  bear: ['bare'], bare: ['bear'],
-  their: ['there'], there: ['their'],
-  knight: ['night'], night: ['knight'],
-  right: ['write', 'rite'], write: ['right', 'rite'],
-  hour: ['our'], our: ['hour'],
-  new: ['knew'], knew: ['new'],
-  sun: ['son'], son: ['sun'],
-  week: ['weak'], weak: ['week'],
-}));
+const HOMOPHONES = new Map(
+  Object.entries({
+    to: ['too', 'two'],
+    too: ['to', 'two'],
+    two: ['to', 'too'],
+    for: ['four', 'fore'],
+    four: ['for', 'fore'],
+    fore: ['for', 'four'],
+    ate: ['eight'],
+    eight: ['ate'],
+    won: ['one'],
+    one: ['won'],
+    sea: ['see'],
+    see: ['sea'],
+    bear: ['bare'],
+    bare: ['bear'],
+    their: ['there'],
+    there: ['their'],
+    knight: ['night'],
+    night: ['knight'],
+    right: ['write', 'rite'],
+    write: ['right', 'rite'],
+    hour: ['our'],
+    our: ['hour'],
+    new: ['knew'],
+    knew: ['new'],
+    sun: ['son'],
+    son: ['sun'],
+    week: ['weak'],
+    weak: ['week'],
+  })
+);
 
-const DIGITS = new Map(Object.entries({
-  0: 'zero', 1: 'one', 2: 'two', 3: 'three', 4: 'four',
-  5: 'five', 6: 'six', 7: 'seven', 8: 'eight', 9: 'nine',
-}));
+const DIGITS = new Map(
+  Object.entries({
+    0: 'zero',
+    1: 'one',
+    2: 'two',
+    3: 'three',
+    4: 'four',
+    5: 'five',
+    6: 'six',
+    7: 'seven',
+    8: 'eight',
+    9: 'nine',
+  })
+);
 
 /** lowercase, fold accents, expand digits, strip everything else. */
 export function normalise(text) {
@@ -53,7 +80,9 @@ export function variantsFor(token) {
 }
 
 export class Speech extends EventTarget {
-  static get supported() { return !!SR; }
+  static get supported() {
+    return !!SR;
+  }
 
   constructor({ lang = 'en-US' } = {}) {
     super();
@@ -82,7 +111,12 @@ export class Speech extends EventTarget {
     };
     rec.onend = () => {
       if (this._wantOn) {
-        try { rec.start(); return; } catch { /* fall through */ }
+        try {
+          rec.start();
+          return;
+        } catch {
+          /* fall through */
+        }
       }
       this._setState('off');
     };
@@ -101,12 +135,20 @@ export class Speech extends EventTarget {
 
     this.rec = rec;
     this._wantOn = true;
-    try { rec.start(); } catch { this._setState('error'); }
+    try {
+      rec.start();
+    } catch {
+      this._setState('error');
+    }
   }
 
   stop() {
     this._wantOn = false;
-    try { this.rec?.stop(); } catch { /* ignore */ }
+    try {
+      this.rec?.stop();
+    } catch {
+      /* ignore */
+    }
     this._setState('off');
   }
 
