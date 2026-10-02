@@ -48,6 +48,10 @@ export class PathLine {
     this.mesh.frustumCulled = false;
     this.group.add(this.mesh);
   }
+setColor(color) {
+   this.material.color.set(color);
+}
+
 
   update(dt) {
     if (!this.mesh || this.reducedMotion) return;

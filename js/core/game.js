@@ -95,6 +95,7 @@ export class Game extends EventTarget {
       return Math.max(0, this.countdown - (now - this._phaseStart) / 1000);
     }
     if (this.state === STATE.PLAYING) {
+      if (this.duration <= 0) return Infinity;
       return Math.max(0, this.duration - (now - this._playStart) / 1000);
     }
     return 0;
@@ -150,7 +151,7 @@ export class Game extends EventTarget {
     if (this.state === STATE.PLAYING) {
       const remaining = this.remaining(now);
       this._emit('tick', { state: this.state, remaining, elapsed: this.elapsed(now) });
-      if (remaining <= 0) this.end(this._playStart + this.duration * 1000);
+      if (this.duration > 0 && remaining <= 0) this.end(this._playStart + this.duration * 1000);
     }
   }
 
@@ -159,11 +160,30 @@ export class Game extends EventTarget {
     if (this.state !== STATE.PLAYING && this.state !== STATE.COUNTDOWN) return this.results;
     this._stopTimer();
     this._endedAt = now;
-    this.results = this._buildResults();
+    const timeUp = this.duration > 0 && (now - this._playStart) / 1000 >= this.duration;
+    this.results = this._buildResults(timeUp);
     this._setState(STATE.RESULTS);
     this._emit('end', this.results);
     return this.results;
   }
+  /** Resume the round after inspecting results or pausing. */
+  resume() {
+    if (this.state !== STATE.RESULTS || !this.board) return;
+    const now = this.now();
+    const paused = now - this._endedAt;
+    this._playStart += paused;
+    // If time was up, switch to unlimited so the player can keep finding words
+    if (this.duration > 0 && this.remaining(now) <= 0) {
+      this.duration = 0;
+    }
+    this.results = null;
+    this._setState(STATE.PLAYING);
+    if (this.autoTick && typeof setInterval === 'function' && !this._timer) {
+      this._timer = setInterval(() => this.tick(), this.tickInterval);
+    }
+    this.tick(now);
+  }
+
 
   /** Back to the lobby; keeps the board reference for "replay". */
   reset() {
@@ -251,7 +271,7 @@ export class Game extends EventTarget {
 
   // ------------------------------------------------------------- results
 
-  _buildResults() {
+  _buildResults(timeUp = false) {
     const found = [...this.found.values()];
     const missed = [];
     if (this.board.words) {
@@ -274,6 +294,7 @@ export class Game extends EventTarget {
       wordsPerMinute: found.length / minutes,
       duration: this.elapsed(this._endedAt),
       possible: this.board.words ? this.board.words.size : null,
+      timeUp,
     };
   }
 

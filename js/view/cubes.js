@@ -112,13 +112,14 @@ const LETTER_VERT = /* glsl */ `
 
 const LETTER_FRAG = /* glsl */ `
   uniform sampler2D map;
+   uniform vec3 uHaloColor;
   varying vec2 vUv;
   varying vec3 vColor;
   varying float vAlpha;
   void main() {
     vec4 t = texture2D(map, vUv);          // r = glyph mask, a = glyph + dark halo
     if (t.a < 0.25) discard;               // hard cut so depth-write stays clean
-    vec3 c = mix(vec3(0.015, 0.02, 0.03), vColor, t.r);
+     vec3 c = mix(uHaloColor, vColor, t.r);
     gl_FragColor = vec4(c, t.a * vAlpha);
     #include <colorspace_fragment>
   }
@@ -255,6 +256,7 @@ export class CubeField {
         map: { value: this.atlas.texture },
         uViewDist: { value: 1e6 },
         uFadeRange: { value: Math.max(1, this.grid.size * this.spacing * 0.5) },
+         uHaloColor: { value: new THREE.Color(0x015, 0x02, 0x03) },
       },
       vertexShader: LETTER_VERT,
       fragmentShader: LETTER_FRAG,
@@ -306,6 +308,10 @@ export class CubeField {
   setGhostOpacity(v) {
     this._ghostOpacityTarget = v;
   }
+   setHaloColor(color) {
+     this.letters.material.uniforms.uHaloColor.value.set(color);
+   }
+
 
   /** Camera → block-centre distance; letters deeper than this fade a little. */
   setViewDistance(d) {

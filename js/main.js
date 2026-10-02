@@ -20,6 +20,7 @@ import { Hud } from './ui/hud.js';
 import { toast } from './ui/toasts.js';
 import { showResults } from './ui/results.js';
 import { loadSettings, saveSettings, recordRound, openLobby } from './ui/settings.js';
+import { THEMES, getTheme, applyTheme } from '../css/themes.js';
 
 const canvas = document.getElementById('board');
 const settings = loadSettings();
@@ -36,8 +37,33 @@ let selection = null;
 let speech = null;
 let keyboardPlay = null;
 let previewTimer = null;
+let hintTimer = null;
 
 view.start();
+// ------------------------------------------------------------------ themes
+function setAppTheme(themeId) {
+   settings.theme = themeId;
+   saveSettings(settings);
+   const { isLight } = applyTheme(themeId);
+   view.setTheme(themeId, isLight);
+   const select = document.getElementById('set-theme');
+   if (select && select.value !== themeId) select.value = themeId;
+}
+function cycleTheme() {
+   const idx = THEMES.findIndex((t) => t.id === settings.theme);
+   const next = THEMES[(idx + 1) % THEMES.length];
+   setAppTheme(next.id);
+   toast(`${next.icon} ${next.name}`, 'grey');
+}
+setAppTheme(settings.theme || 'system');
+if (window.matchMedia) {
+   window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+     if (!settings.theme || settings.theme === 'system' || settings.theme === 'auto') {
+       setAppTheme('system');
+     }
+   });
+}
+document.getElementById('btn-theme')?.addEventListener('click', cycleTheme);
 
 // ------------------------------------------------------------------ board
 
@@ -90,6 +116,7 @@ async function newRound(opts = {}) {
 function onSelectionChange(e) {
   const { path, rejected } = e.detail;
   clearPreview();
+  clearHint();
   view.setPath(path, selection.legal());
   hud.setChips(path.map((i) => board.grid.letterAt(i)));
   hud.setInput('');
@@ -115,8 +142,14 @@ function submitTyped() {
   const word = normaliseWord(raw);
   if (!word) return;
   const res = game.submitWord(word);
-  if (res.ok) hud.setInput('');
-  else hud.selectInput();
+  if (res.ok) {
+    hud.setInput('');
+    hud.setInputStatus(null);
+    hud.setChips([]);
+    view.setPath([], null);
+  } else {
+    hud.selectInput();
+  }
   return res;
 }
 
@@ -141,9 +174,9 @@ function onTyping(raw) {
 // ------------------------------------------------------------ game events
 
 game.addEventListener('tick', (e) => {
-  const { state, remaining } = e.detail;
+  const { state, remaining, elapsed } = e.detail;
   if (state === STATE.COUNTDOWN) hud.setCountdown(Math.ceil(remaining));
-  else hud.setTimer(remaining);
+  else hud.setTimer(remaining, elapsed);
 });
 
 game.addEventListener('state', (e) => {
@@ -168,6 +201,8 @@ game.addEventListener('word', (e) => {
   view.celebrate(path);
   hud.setInput('');
   hud.setInputStatus(null);
+  hud.setChips([]);
+  view.setPath([], null);
 });
 
 game.addEventListener('miss', (e) => {
@@ -179,9 +214,13 @@ game.addEventListener('miss', (e) => {
 game.addEventListener('end', (e) => {
   const results = e.detail;
   recordRound(results);
-  hud.setTimer(0);
+  hud.setTimer(game.duration <= 0 ? Infinity : 0, results.duration);
   showResults(results, {
     onAgain: () => newRound({ seed: undefined }),
+    onResume: () => {
+      game.resume();
+      hud.focusInput();
+    },
     onLobby: () => lobby(),
     onReplay: (path) => preview(path, 2200),
   });
@@ -230,6 +269,73 @@ function clearPreview() {
     previewTimer = null;
   }
 }
+function clearHint() {
+  if (hintTimer) {
+    clearTimeout(hintTimer);
+    hintTimer = null;
+  }
+  view.setHint(-1);
+}
+function giveHint() {
+  if (game.state !== STATE.PLAYING || !board) return;
+  if (!board.words || board.words.size === 0) {
+    toast('No dictionary hints available', 'grey');
+    return;
+  }
+  clearHint();
+  // If letters are already selected, hint the next cube along a matching unfound word
+  if (selection && selection.path.length > 0) {
+    const selPath = selection.path;
+    const candidates = [];
+    for (const [w, entry] of board.words) {
+      if (game.found.has(w)) continue;
+      if (entry.path && entry.path.length > selPath.length) {
+        let match = true;
+        for (let i = 0; i < selPath.length; i++) {
+          if (entry.path[i] !== selPath[i]) {
+            match = false;
+            break;
+          }
+        }
+        if (match) candidates.push({ word: w, entry, nextIdx: entry.path[selPath.length] });
+      }
+    }
+    if (candidates.length > 0) {
+      candidates.sort((a, b) => a.word.length - b.word.length);
+      const pick = candidates[0];
+      const nextLetter = board.grid.letterAt(pick.nextIdx);
+      view.setHint(pick.nextIdx);
+      view.flash(pick.nextIdx);
+      toast(`Hint: next letter is "${nextLetter}" (${pick.word.length} letters)`, 'good');
+      hud.announce(`Hint: next letter is ${nextLetter}`);
+      hintTimer = setTimeout(clearHint, 4000);
+      return;
+    } else {
+      toast('No unfound words extend this path', 'grey');
+      return;
+    }
+  }
+  // Otherwise hint the first letter of an unfound word
+  const unfound = [];
+  for (const [w, entry] of board.words) {
+    if (!game.found.has(w)) unfound.push({ word: w, entry });
+  }
+  if (unfound.length === 0) {
+    toast('All words found!', 'good');
+    return;
+  }
+  unfound.sort((a, b) => a.word.length - b.word.length);
+  const pool = unfound.slice(0, Math.max(1, Math.min(10, Math.ceil(unfound.length / 3))));
+  const chosen = pool[Math.floor(Math.random() * pool.length)];
+  const startIdx = chosen.entry.path[0];
+  const startLetter = board.grid.letterAt(startIdx);
+  view.setHint(startIdx);
+  view.flash(startIdx);
+  toast(`Hint: starts with "${startLetter}" (${chosen.word.length} letters)`, 'good');
+  hud.announce(`Hint: starts with ${startLetter}, ${chosen.word.length} letters`);
+  hintTimer = setTimeout(clearHint, 4000);
+}
+
 
 // -------------------------------------------------------------- HUD wiring
 
@@ -237,6 +343,7 @@ hud.bind({
   onSubmit: submitTyped,
   onClear: () => {
     selection?.clear();
+    clearHint();
     hud.setInput('');
     hud.setInputStatus(null);
     view.setPath([], null);
@@ -248,6 +355,10 @@ hud.bind({
   onMic: () => toggleMic(),
   onPeel: (v) => view.effects.setPeel(v),
   onSnap: (which) => view.controls.snap(which),
+  onHint: () => giveHint(),
+  onEnd: () => {
+    if (game.state === STATE.PLAYING || game.state === STATE.COUNTDOWN) game.end();
+  },
 });
 
 // ------------------------------------------------------------------ speech
@@ -276,6 +387,8 @@ function toggleMic() {
       }
       hud.setInput('');
       hud.setInputStatus(null);
+      hud.setChips([]);
+      view.setPath([], null);
     });
   }
   speech.toggle();
@@ -321,6 +434,20 @@ window.addEventListener('keydown', (e) => {
     case '3':
       view.controls.snap('iso');
       break;
+     case 't':
+     case 'T':
+       if (!typing) {
+         cycleTheme();
+         break;
+       }
+       return;
+    case 'h':
+    case 'H':
+      if (!typing) {
+        giveHint();
+        break;
+      }
+      return;
     case 'm':
     case 'M':
       if (!typing) lobby();
@@ -332,6 +459,7 @@ window.addEventListener('keydown', (e) => {
 });
 
 window.addEventListener('keydown', (e) => {
+  if (e.defaultPrevented) return;
   // typing anywhere focuses the field (§4.2)
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   if (!/^[a-zA-Z]$/.test(e.key)) return;
@@ -343,10 +471,17 @@ window.addEventListener('keydown', (e) => {
 // ------------------------------------------------------------------- lobby
 
 async function lobby() {
-  const choice = await openLobby(settings);
+   const choice = await openLobby(settings, {
+     onThemePreview: (themeId) => setAppTheme(themeId),
+   });
   if (!choice) return;
-  Object.assign(settings, choice.settings);
-  saveSettings(settings);
+   if (choice.settings) {
+     if (choice.settings.theme !== settings.theme) {
+       setAppTheme(choice.settings.theme);
+     }
+     Object.assign(settings, choice.settings);
+     saveSettings(settings);
+   }
   if (choice.action === 'daily') {
     const seed = dailySeed(new Date(), settings.size, settings.adjacency);
     await newRound({ seed });

@@ -8,6 +8,7 @@ import { CubeField } from './cubes.js';
 import { Effects } from './effects.js';
 import { PathLine } from './pathline.js';
 import { CameraControls } from './controls.js';
+import { getComputed3DColor } from '../../css/themes.js';
 
 export class View {
   constructor(canvas, { reducedMotion = false } = {}) {
@@ -34,6 +35,7 @@ export class View {
     const fill = new THREE.DirectionalLight(0x88aacc, 0.35);
     fill.position.set(-5, -3, -4);
     this.scene.add(hemi, key, fill);
+     this.hemiLight = hemi;
 
     this.block = new THREE.Group();
     this.scene.add(this.block);
@@ -44,6 +46,8 @@ export class View {
     this.controls = new CameraControls(this.camera, canvas, { reducedMotion });
     this.cubes = null;
     this.effects = null;
+     this.themeId = null;
+     this.isLight = false;
 
     this._v3 = new THREE.Vector3();
     this._points = [];
@@ -67,11 +71,41 @@ export class View {
     }
     this.cubes = new CubeField(grid);
     this.effects = new Effects(this.cubes, { reducedMotion: this.reducedMotion });
+     if (this.themeId) {
+       this.setTheme(this.themeId, this.isLight);
+     }
     this.block.add(this.cubes.group);
     this.setPath([], null);
     this.controls.snap('iso', 0);
     this.frame();
   }
+   setTheme(themeId, isLight) {
+     this.themeId = themeId;
+     this.isLight = isLight;
+     if (this.effects) {
+       this.effects.setTheme(themeId, isLight);
+     }
+     if (this.cubes) {
+      const haloColor = getComputed3DColor('--color-3d-halo', isLight ? 0xf8fafc : 0x0b1016);
+      this.cubes.setHaloColor(haloColor);
+     }
+     if (this.pathline && this.effects) {
+       this.pathline.setColor(this.effects.palette.selected);
+     }
+     if (this.hemiLight) {
+      const sky = getComputed3DColor('--color-3d-light-sky', isLight ? 0xffffff : 0xdfefff);
+      const ground = getComputed3DColor('--color-3d-light-ground', isLight ? 0xa0aec0 : 0x1b2430);
+       if (isLight) {
+        this.hemiLight.color.set(sky);
+        this.hemiLight.groundColor.set(ground);
+         this.hemiLight.intensity = 1.35;
+       } else {
+        this.hemiLight.color.set(sky);
+        this.hemiLight.groundColor.set(ground);
+         this.hemiLight.intensity = 1.15;
+       }
+     }
+   }
 
   frame() {
     if (!this.cubes) return;

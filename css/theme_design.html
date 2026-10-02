@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Troggle — Unified Theme & 3D Material Studio</title>
+    <link rel="stylesheet" href="./themes.css" />
+    <style>
+      :root {
+        --studio-bg: #0b1016;
+        --studio-fg: #eef2f6;
+        --studio-panel: #141d28;
+        --studio-line: #24313f;
+        --studio-accent: #2ec4b6;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background: var(--color-canvas, var(--studio-bg));
+        color: var(--color-text, var(--studio-fg));
+        font: 14px/1.4 system-ui, -apple-system, sans-serif;
+        overflow: hidden;
+      }
+      #studio-app {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        height: 100vh;
+        width: 100vw;
+      }
+      /* Top header */
+      header.studio-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 8px 16px;
+        background: color-mix(in srgb, var(--color-surface-1, var(--studio-panel)) 92%, transparent);
+        border-bottom: 1px solid var(--color-border, var(--studio-line));
+        z-index: 10;
+        backdrop-filter: blur(8px);
+      }
+      .studio-brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+      }
+      .theme-pill-group, .action-group {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .btn {
+        appearance: none;
+        border: 1px solid var(--color-border, var(--studio-line));
+        background: color-mix(in srgb, var(--color-surface-1, #141d28) 80%, transparent);
+        color: var(--color-text, inherit);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font: 600 12px inherit;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .btn:hover {
+        border-color: var(--color-brand, var(--studio-accent));
+      }
+      .btn.active {
+        background: var(--color-brand, var(--studio-accent));
+        color: var(--color-on-brand, #04231f);
+        border-color: var(--color-brand, var(--studio-accent));
+      }
+
+      /* Main Split Workspace */
+      #workspace {
+        display: grid;
+        grid-template-columns: minmax(420px, 1fr) minmax(360px, 480px);
+        height: 100%;
+        min-height: 0;
+      }
+      @media (max-width: 900px) {
+        #workspace {
+          grid-template-columns: 1fr;
+          grid-template-rows: 1fr 1fr;
+        }
+      }
+
+      /* Left Side: Point-CAD Harness Container */
+      #cad-pane {
+        position: relative;
+        height: 100%;
+        min-height: 0;
+        border-right: 1px solid var(--color-border, var(--studio-line));
+        overflow: hidden;
+      }
+      point-cad {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      #fallback-designer {
+        display: none;
+        padding: 24px;
+        height: 100%;
+        overflow-y: auto;
+      }
+      .token-card {
+        background: var(--color-surface-1, #141d28);
+        border: 1px solid var(--color-border, #24313f);
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 12px;
+      }
+      .swatch-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .swatch-item {
+        border: 1px solid var(--color-border, #24313f);
+        border-radius: 6px;
+        padding: 6px;
+        font-size: 11px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .swatch-color {
+        height: 24px;
+        border-radius: 4px;
+        border: 1px solid rgba(255,255,255,0.15);
+      }
+
+      /* Right Side: Interactive 3D Viewport */
+      #preview-3d-pane {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        background: radial-gradient(120% 90% at 50% 20%, color-mix(in srgb, var(--color-surface-1, #1a2735) 75%, var(--color-canvas, #0b1016)) 0%, var(--color-canvas, #0b1016) 62%, var(--color-surface-2, #05080c) 100%);
+        height: 100%;
+        min-height: 0;
+      }
+      #cube-canvas-host {
+        flex: 1;
+        position: relative;
+        width: 100%;
+        min-height: 0;
+      }
+      #board-3d {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .preview-controls {
+        padding: 10px 14px;
+        border-top: 1px solid var(--color-border, var(--studio-line));
+        background: color-mix(in srgb, var(--color-surface-1, #141d28) 85%, transparent);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        font-size: 12px;
+      }
+      .slider-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .slider-row input[type=range] {
+        flex: 1;
+        accent-color: var(--color-brand, #2ec4b6);
+      }
+      .preview-badges {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .banner-tag {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: color-mix(in srgb, var(--color-brand, #2ec4b6) 20%, transparent);
+        color: var(--color-brand, #2ec4b6);
+      }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.166.1/build/three.module.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="studio-app">
+      <header class="studio-bar">
+        <div class="studio-brand">
+          <span>🎲</span>
+          <span>Troggle Theme & 3D Material Studio</span>
+        </div>
+        <div class="theme-pill-group">
+          <span style="font-size:11px; opacity:0.7;">Themes:</span>
+          <button class="btn active" data-theme="dark">Dark</button>
+          <button class="btn" data-theme="light">Light</button>
+          <button class="btn" data-theme="midnight">Midnight</button>
+          <button class="btn" data-theme="synthwave">Synthwave</button>
+          <button class="btn" data-theme="forest">Forest</button>
+        </div>
+        <div class="action-group">
+          <button id="btn-snap-iso" class="btn">Iso</button>
+          <button id="btn-snap-front" class="btn">Front</button>
+          <button id="btn-snap-top" class="btn">Top</button>
+          <button id="btn-sim-word" class="btn">Path Test</button>
+        </div>
+      </header>
+
+      <main id="workspace">
+        <section id="cad-pane">
+          <point-cad
+            id="cad"
+            panels="swatches,preview,handoff,variables,points,constraints,script,solve"
+          ></point-cad>
+          
+          <div id="fallback-designer">
+            <h3>Unified Theme & 3D Material Tokens</h3>
+            <p style="opacity:0.8;">
+              Point-CAD harness loaded or fallback mode active. The 5 canonical Troggle themes
+              control both the 2D interface and the 3D scene materials simultaneously.
+            </p>
+            <div id="token-cards-container"></div>
+          </div>
+        </section>
+
+        <section id="preview-3d-pane">
+          <div id="cube-canvas-host">
+            <canvas id="board-3d"></canvas>
+          </div>
+          <div class="preview-controls">
+            <div class="slider-row">
+              <label for="peel-ctrl" style="min-width:70px;">Peel: <b id="peel-val">0%</b></label>
+              <input id="peel-ctrl" type="range" min="0" max="100" value="0" />
+            </div>
+            <div class="preview-badges">
+              <span class="banner-tag">3D Materials Live</span>
+              <span class="banner-tag" id="current-theme-tag">Theme: Dark</span>
+              <span class="banner-tag" id="selection-status">Status: Normal</span>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Unified Theme Document for Point-CAD and Theme Extraction -->
+    <script type="application/json" id="theme-doc">
+{
+  "generator": "troggle.unified.studio",
+  "generated": "2025-01-01T00:00:00Z",
+  "pcad": "# Troggle Unified Theme & 3D Material Model\nspace oklab\nunits none deg\ngamut srgb\n\n# ---- 2D UI & Surface Variables -------------------------------------------\nvar stepL    = 0.056\nvar sunkenL  = 0.02\nvar textL    = 0.96\nvar mutedL   = 0.705\nvar onBrandL = 0.23\nvar onBrandC = 0.04\nvar onWarnL  = 0.22\nvar accentL  = 0.885\nvar accentC  = 0.135\nvar warnL    = 0.785\nvar warnC    = 0.17\nvar dangerL  = 0.645\nvar dangerC  = 0.2\n\n# ---- UI Points -----------------------------------------------------------\npoint canvas      at #0b1016                 anchor\npoint brand       at #2ec4b6                 anchor\npoint chrome      at oklch(25% 0.028 250)    orientation\npoint readingGray at oklch(70.5% 0.028 248)  orientation\npoint surfaceSunken at #0d141c  derived\npoint surface1      at #141d28  derived\npoint surface2      at #1d2a37  derived\npoint border        at #24313f  derived\npoint text          at #eef2f6  derived\npoint textMuted     at #93a3b3  derived\npoint textFaint     at #5d6c7c  derived\npoint accent        at #ffd166  derived\npoint warning       at #ff9f1c  derived\npoint danger        at #ef476f  derived\npoint onBrand       at #04231f  derived\npoint onWarning     at #2a1a00  derived\npoint onDanger      at #ffffff  derived\npoint chip          at #e9dcc3  derived\npoint chipText      at #241f1b  derived\n\n# ---- 3D Materials & Lighting Points --------------------------------------\npoint cubeBase           at #9fc3e6  derived\npoint cubeBaseLetter     at #f6f8fb  derived\npoint cubeDim            at #3c4a5c  derived\npoint cubeDimLetter      at #7a8794  derived\npoint cubeSelected       at #2ec4b6  derived\npoint cubeSelectedLetter at #ffffff  derived\npoint cubeLegal          at #ffd166  derived\npoint cubeLegalLetter    at #fff3c4  derived\npoint cubeCursor         at #8ecae6  derived\npoint cubeCursorLetter   at #ffffff  derived\npoint cubeHint           at #ff9f1c  derived\npoint cubeHintLetter     at #ffffff  derived\npoint cubeHalo           at #0b1016  derived\npoint lightSky           at #dfefff  derived\npoint lightGround        at #1b2430  derived\n\n# ---- Constraints: UI & Surfaces -----------------------------------------\ndL canvas surface1 = stepL\ndL surface1 surface2 = stepL\ndL canvas surfaceSunken = sunkenL\nlock H chrome surfaceSunken surface1 surface2 border\nlock C surface1 surface2 border\ncontrast border canvas   >= 3\ncontrast border surface1 >= 3\n\nlock H readingGray text textMuted textFaint\nL text = textL\nL textMuted = mutedL\ncontrast text canvas        >= 7\ncontrast text surface1      >= 7\ncontrast text surface2      >= 4.5\ncontrast textMuted canvas   >= 4.5\n\ncontrast brand canvas   >= 3\ncontrast brand surface1 >= 3\nlock H brand onBrand\nL onBrand = onBrandL\ncontrast onBrand brand >= 4.5\n\ndH brand accent = -95\nL accent = accentL\ncontrast accent canvas >= 4.5\n\ndH accent warning = -24\nL warning = warnL\ncontrast warning surface1 >= 3\n\nH danger = 10\nL danger = dangerL\ncontrast danger canvas   >= 4.5\n\n# ---- Constraints: 3D Materials Synchronisation ---------------------------\nlock H cubeBase chrome\nlock H cubeSelected brand\nlock H cubeLegal accent\nlock H cubeHint warning\n\n# ---- 5 Unified Canonical Themes ------------------------------------------\ntheme dark {\n  canvas            at #0b1016\n  brand             at #2ec4b6\n  chrome            at oklch(25% 0.028 250)\n  readingGray       at oklch(70.5% 0.028 248)\n  cubeBase          at #9fc3e6\n  cubeBaseLetter    at #f6f8fb\n  cubeDim           at #3c4a5c\n  cubeDimLetter     at #7a8794\n  cubeSelected      at #2ec4b6\n  cubeSelectedLetter at #ffffff\n  cubeLegal         at #ffd166\n  cubeLegalLetter   at #fff3c4\n  cubeCursor        at #8ecae6\n  cubeCursorLetter  at #ffffff\n  cubeHint          at #ff9f1c\n  cubeHintLetter    at #ffffff\n  cubeHalo          at #0b1016\n  lightSky          at #dfefff\n  lightGround       at #1b2430\n}\n\ntheme light {\n  canvas            at oklch(97% 0.006 250)\n  brand             at oklch(52% 0.1 185)\n  chrome            at oklch(90% 0.02 250)\n  readingGray       at oklch(46% 0.03 250)\n  var stepL    = -0.04\n  var sunkenL  = -0.02\n  var textL    = 0.22\n  var mutedL   = 0.46\n  var onBrandL = 0.985\n  var onBrandC = 0.01\n  var onWarnL  = 0.15\n  var accentL  = 0.52\n  var warnL    = 0.6\n  var dangerL  = 0.53\n  cubeBase          at #2563eb\n  cubeBaseLetter    at #0f172a\n  cubeDim           at #94a3b8\n  cubeDimLetter     at #64748b\n  cubeSelected      at #0d9488\n  cubeSelectedLetter at #ffffff\n  cubeLegal         at #d97706\n  cubeLegalLetter   at #451a03\n  cubeCursor        at #0284c7\n  cubeCursorLetter  at #ffffff\n  cubeHint          at #e11d48\n  cubeHintLetter    at #ffffff\n  cubeHalo          at #f8fafc\n  lightSky          at #ffffff\n  lightGround       at #a0aec0\n}\n\ntheme midnight {\n  canvas            at #0b1016\n  brand             at #2ec4b6\n  chrome            at oklch(28% 0.04 240)\n  readingGray       at oklch(72% 0.03 245)\n  cubeBase          at #4a7c9d\n  cubeBaseLetter    at #eef2f6\n  cubeDim           at #203042\n  cubeDimLetter     at #5a6d82\n  cubeSelected      at #2ec4b6\n  cubeSelectedLetter at #ffffff\n  cubeLegal         at #ffd166\n  cubeLegalLetter   at #241f1b\n  cubeCursor        at #56cfe1\n  cubeCursorLetter  at #ffffff\n  cubeHint          at #ff9f1c\n  cubeHintLetter    at #ffffff\n  cubeHalo          at #050e18\n  lightSky          at #cbe7ff\n  lightGround       at #0a1525\n}\n\ntheme synthwave {\n  canvas            at oklch(18% 0.05 300)\n  brand             at oklch(75% 0.22 330)\n  chrome            at oklch(30% 0.08 290)\n  readingGray       at oklch(74% 0.06 310)\n  cubeBase          at #b5179e\n  cubeBaseLetter    at #fde2e4\n  cubeDim           at #480ca8\n  cubeDimLetter     at #7209b7\n  cubeSelected      at #f72585\n  cubeSelectedLetter at #ffffff\n  cubeLegal         at #4cc9f0\n  cubeLegalLetter   at #03045e\n  cubeCursor        at #7209b7\n  cubeCursorLetter  at #ffffff\n  cubeHint          at #ffb703\n  cubeHintLetter    at #023047\n  cubeHalo          at #1a052e\n  lightSky          at #ffc8f0\n  lightGround       at #20053a\n}\n\ntheme forest {\n  canvas            at oklch(18% 0.03 145)\n  brand             at oklch(75% 0.14 140)\n  chrome            at oklch(28% 0.04 145)\n  readingGray       at oklch(72% 0.035 135)\n  cubeBase          at #52796f\n  cubeBaseLetter    at #e9f5ed\n  cubeDim           at #2f3e3a\n  cubeDimLetter     at #6b877f\n  cubeSelected      at #74c69d\n  cubeSelectedLetter at #081c15\n  cubeLegal         at #d4a373\n  cubeLegalLetter   at #2b1c11\n  cubeCursor        at #95d5b2\n  cubeCursorLetter  at #1b4332\n  cubeHint          at #e76f51\n  cubeHintLetter    at #ffffff\n  cubeHalo          at #0b1a14\n  lightSky          at #e0faeb\n  lightGround       at #112319\n}\n\nsolver gauss-newton iterations 200 tolerance 1e-6\nview camera (300, 250, 400) target (0, 0, 200) up (0, 0, 1) perspective\nview grid none show labels axes hide seeds\n",
+  "doc": {
+    "project": "troggle-unified",
+    "prefix": "color-",
+    "format": "oklch",
+    "scope": ":root",
+    "switchMode": "attribute",
+    "defaultTheme": "dark",
+    "summary": "Unified token model governing both the 2D UI elements and the 3D cube field, letters, and scene illumination."
+  }
+}
+    </script>
+
+    <script type="module">
+      import { View } from '../js/view/renderer.js';
+      import { Grid } from '../js/core/grid.js';
+      import { THEMES, applyTheme, getTheme } from './themes.js';
+
+      // 1. Initialize Interactive 3D Viewport
+      const canvas = document.getElementById('board-3d');
+      const view = new View(canvas);
+
+      // Create a representative 4³ sample grid
+      const SAMPLE_LETTERS = [
+        'T','R','O','G','G','L','E','S','W','O','R','D','C','U','B','E',
+        'F','A','C','E','E','D','G','E','P','A','T','H','T','R','I','E',
+        'V','I','E','W','H','I','N','T','G','L','O','W','M','E','S','H',
+        'S','O','L','V','E','D','A','Y','S','C','O','R','E','S','U','M'
+      ];
+      const sampleGrid = new Grid(4, SAMPLE_LETTERS, 'corner');
+      view.setBoard(sampleGrid);
+      view.start();
+
+      // Sample path for testing highlights: "CUBE" -> indices [12, 13, 14, 15]
+      const SAMPLE_PATH = [12, 13, 14, 15];
+      let pathActive = false;
+
+      // 2. Setup theme switching and live 3D sync
+      function switchStudioTheme(themeId) {
+        applyTheme(themeId);
+        const { isLight } = applyTheme(themeId);
+        view.setTheme(themeId, isLight);
+
+        // Update pills
+        document.querySelectorAll('.theme-pill-group .btn').forEach((btn) => {
+          btn.classList.toggle('active', btn.dataset.theme === themeId);
+        });
+
+        document.getElementById('current-theme-tag').textContent = `Theme: ${getTheme(themeId)?.name || themeId}`;
+      }
+
+      document.querySelectorAll('.theme-pill-group .btn').forEach((btn) => {
+        btn.addEventListener('click', () => switchStudioTheme(btn.dataset.theme));
+      });
+
+      // Camera view snap tools
+      document.getElementById('btn-snap-iso')?.addEventListener('click', () => view.controls.snap('iso'));
+      document.getElementById('btn-snap-front')?.addEventListener('click', () => view.controls.snap('front'));
+      document.getElementById('btn-snap-top')?.addEventListener('click', () => view.controls.snap('top'));
+
+      // Path simulation toggle
+      const btnSimWord = document.getElementById('btn-sim-word');
+      const selectionStatus = document.getElementById('selection-status');
+      btnSimWord?.addEventListener('click', () => {
+        pathActive = !pathActive;
+        if (pathActive) {
+          const legalSet = new Set(sampleGrid.neighbours(15));
+          view.setPath(SAMPLE_PATH, legalSet);
+          view.setHint(20);
+          view.setCursor(12);
+          selectionStatus.textContent = 'Status: Selection & Glow Active';
+          btnSimWord.classList.add('active');
+        } else {
+          view.setPath([], null);
+          view.setHint(-1);
+          view.setCursor(-1);
+          selectionStatus.textContent = 'Status: Normal';
+          btnSimWord.classList.remove('active');
+        }
+      });
+
+      // Peel slider
+      const peelCtrl = document.getElementById('peel-ctrl');
+      const peelVal = document.getElementById('peel-val');
+      peelCtrl?.addEventListener('input', (e) => {
+        const pct = Number(e.target.value);
+        peelVal.textContent = `${pct}%`;
+        view.effects?.setPeel(pct / 100);
+      });
+
+      // 3. Mount Point-CAD harness and hook into theme updates
+      const HARNESS_URL =
+        'https://math.cognotik.com/experiments/point-cad/extensions/theme/ui/harness.js';
+
+      try {
+        const { bootHarness } = await import(HARNESS_URL);
+        const cadEl = document.getElementById('cad');
+        await bootHarness(cadEl);
+
+        // When the Point-CAD harness changes active theme or solves, update the 3D scene
+        cadEl.addEventListener('theme-change', (e) => {
+          if (e.detail?.theme) switchStudioTheme(e.detail.theme);
+        });
+        cadEl.addEventListener('solved', () => {
+          const current = document.documentElement.dataset.theme || 'dark';
+          switchStudioTheme(current);
+        });
+      } catch (err) {
+        console.warn('Point-CAD harness unavailable; running in self-contained studio mode.', err);
+        document.getElementById('cad').style.display = 'none';
+        const fallback = document.getElementById('fallback-designer');
+        fallback.style.display = 'block';
+
+        const container = document.getElementById('token-cards-container');
+        THEMES.filter(t => t.id !== 'system').forEach((t) => {
+          const card = document.createElement('div');
+          card.className = 'token-card';
+          card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong>${t.icon} ${t.name}</strong>
+              <button class="btn" style="padding:2px 8px; font-size:11px;">Preview 3D</button>
+            </div>
+            <p style="margin:4px 0 8px; font-size:12px; opacity:0.75;">${t.description}</p>
+            <div class="swatch-grid">
+              ${Object.entries(t.palette || {}).map(([k, hex]) => `
+                <div class="swatch-item">
+                  <div class="swatch-color" style="background:#${hex.toString(16).padStart(6, '0')};"></div>
+                  <span>${k}</span>
+                </div>
+              `).join('')}
+            </div>
+          `;
+          card.querySelector('button').addEventListener('click', () => switchStudioTheme(t.id));
+          container.appendChild(card);
+        });
+      }
+
+      // Initialise default theme
+      switchStudioTheme('dark');
+    </script>
+  </body>
+</html>

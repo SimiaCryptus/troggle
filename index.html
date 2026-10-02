@@ -5,7 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#0b1016" />
     <title>Troggle — Tridimensional Boggle</title>
+     <link rel="stylesheet" href="css/themes.css" />
     <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .res-missed-details {
+        margin: 1rem 0;
+        text-align: left;
+      }
+      .res-missed-summary {
+        cursor: pointer;
+        font-weight: 600;
+        padding: 0.5rem 0.25rem;
+        user-select: none;
+      }
+      .res-missed-summary:hover {
+        opacity: 0.85;
+      }
+    </style>
     <script type="importmap">
       {
         "imports": {
@@ -52,6 +68,7 @@
         <h1 id="title" class="title">Troggle 4³</h1>
         <div class="topbar-right">
           <div id="score" class="score" aria-label="score">★ 0</div>
+         <button id="btn-theme" class="icon-btn" title="Change theme (T)" aria-label="Change theme">🎨</button>
           <button id="btn-menu" class="icon-btn" title="Menu (M)" aria-label="Menu">☰</button>
         </div>
       </header>
@@ -82,6 +99,8 @@
             <button id="btn-front" class="tool" title="Front view (1)">front</button>
             <button id="btn-top" class="tool" title="Top view (2)">top</button>
             <button id="btn-iso" class="tool" title="Iso view (3)">iso</button>
+            <button id="btn-hint" class="tool" title="Get a hint (H)">hint</button>
+            <button id="btn-end" class="tool" title="End round & see answers">end</button>
           </div>
         </div>
 
@@ -151,12 +170,24 @@
         <label
           >Round length
           <select id="set-duration">
+            <option value="0">Unlimited</option>
             <option value="90">90 s</option>
             <option value="180">3 min</option>
             <option value="300">5 min</option>
             <option value="600">10 min</option>
           </select>
         </label>
+       <label
+         >Theme
+         <select id="set-theme">
+           <option value="system">Auto (System)</option>
+           <option value="dark">Point-CAD Dark</option>
+           <option value="light">Point-CAD Light</option>
+           <option value="midnight">Troggle Midnight</option>
+           <option value="synthwave">Synthwave 80s</option>
+           <option value="forest">Nordic Forest</option>
+         </select>
+       </label>
 
         <label class="check"> <input id="set-reduced" type="checkbox" /> Reduce motion </label>
 
@@ -174,14 +205,19 @@
     </dialog>
 
     <dialog id="results" class="sheet">
-      <h2>Time!</h2>
+      <h2 id="res-title">Time!</h2>
       <p class="res-score"><span id="res-score">0</span> <small>points</small></p>
       <p id="res-stats" class="muted"></p>
       <div id="res-best"></div>
-      <h3>Missed <span id="res-missed-count" class="muted"></span></h3>
-      <ul id="res-missed" class="found-list missed"></ul>
+      <details id="res-missed-details" class="res-missed-details">
+        <summary id="res-missed-summary" class="res-missed-summary">
+          Missed words / Answers <span id="res-missed-count" class="muted"></span>
+        </summary>
+        <ul id="res-missed" class="found-list missed"></ul>
+      </details>
       <div class="row">
-        <button id="btn-again" class="primary">Play again</button>
+        <button id="btn-resume" class="primary">Continue playing</button>
+        <button id="btn-again">Play again</button>
         <button id="btn-share">Share</button>
         <button id="btn-lobby" class="ghost">Settings</button>
       </div>

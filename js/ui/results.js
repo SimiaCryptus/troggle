@@ -28,8 +28,12 @@ function shareText(results) {
     .join('\n');
 }
 
-export function showResults(results, { onAgain, onLobby, onReplay } = {}) {
+export function showResults(results, { onAgain, onResume, onLobby, onReplay } = {}) {
   const dlg = $('results');
+  const title = $('res-title');
+  if (title) {
+    title.textContent = results.timeUp ? "Time's up!" : 'Round Finished!';
+  }
   $('res-score').textContent = String(results.score);
   $('res-stats').textContent =
     `${results.found.length} words${results.possible ? ` of ${results.possible} possible` : ''} · ` +
@@ -50,6 +54,11 @@ export function showResults(results, { onAgain, onLobby, onReplay } = {}) {
     b.appendChild(btn);
     bestBox.appendChild(b);
   }
+  const details = $('res-missed-details');
+  if (details) {
+    details.open = false; // Hidden by default to avoid spoilers
+  }
+
 
   const list = $('res-missed');
   list.innerHTML = '';
@@ -66,6 +75,16 @@ export function showResults(results, { onAgain, onLobby, onReplay } = {}) {
     li.appendChild(btn);
     list.appendChild(li);
   }
+  const resume = $('btn-resume');
+  if (resume) {
+    const allFound = results.possible != null && results.found.length >= results.possible;
+    resume.style.display = allFound ? 'none' : '';
+    resume.onclick = () => {
+      dlg.close();
+      onResume?.();
+    };
+  }
+
 
   const again = $('btn-again');
   const share = $('btn-share');

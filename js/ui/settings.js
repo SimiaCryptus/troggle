@@ -12,6 +12,7 @@ export const DEFAULTS = Object.freeze({
   reducedMotion: false,
   colorblind: false,
   sound: false,
+   theme: 'system',
 });
 
 export function loadSettings() {
@@ -60,37 +61,41 @@ export function recordRound(results) {
 }
 
 /**
- * Show the lobby; resolves with `{action, settings, seedString}` or null.
+  * Show the lobby; resolves with `{action, settings, seedString}` or null.
  */
-export function openLobby(settings) {
+export function openLobby(settings, { onThemePreview } = {}) {
   const dlg = document.getElementById('lobby');
   const size = document.getElementById('set-size');
   const adjacency = document.getElementById('set-adjacency');
   const duration = document.getElementById('set-duration');
+   const theme = document.getElementById('set-theme');
   const reduced = document.getElementById('set-reduced');
   const seed = document.getElementById('seed-input');
 
   size.value = String(settings.size);
   adjacency.value = settings.adjacency;
   duration.value = String(settings.duration);
+   if (theme) theme.value = settings.theme || 'system';
   reduced.checked = !!settings.reducedMotion;
   seed.value = '';
+   const onThemeChange = () => {
+     if (theme && onThemePreview) onThemePreview(theme.value);
+   };
+   theme?.addEventListener('change', onThemeChange);
 
   return new Promise((resolve) => {
     const onClose = () => {
+       theme?.removeEventListener('change', onThemeChange);
       dlg.removeEventListener('close', onClose);
       const action = dlg.returnValue;
       const next = {
         size: Number(size.value),
         adjacency: adjacency.value,
         duration: Number(duration.value),
+         theme: theme ? theme.value : settings.theme,
         reducedMotion: reduced.checked,
       };
-      if (action === 'play' || action === 'daily') {
-        resolve({ action, settings: next, seedString: seed.value.trim() || null });
-      } else {
-        resolve(null);
-      }
+       resolve({ action, settings: next, seedString: seed.value.trim() || null });
     };
     dlg.addEventListener('close', onClose);
     if (!dlg.open) dlg.showModal();

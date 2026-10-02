@@ -43,6 +43,8 @@ export class Hud {
     $('btn-front').addEventListener('click', () => on.onSnap?.('front'));
     $('btn-top').addEventListener('click', () => on.onSnap?.('top'));
     $('btn-iso').addEventListener('click', () => on.onSnap?.('iso'));
+    $('btn-hint')?.addEventListener('click', () => on.onHint?.());
+    $('btn-end')?.addEventListener('click', () => on.onEnd?.());
 
     this.peelSlider.addEventListener('input', () => {
       const v = Number(this.peelSlider.value) / 100;
@@ -108,7 +110,15 @@ export class Hud {
     if (state === STATE.RESULTS) this.setChips([]);
   }
 
-  setTimer(seconds) {
+  setTimer(seconds, elapsed = 0) {
+    if (!Number.isFinite(seconds)) {
+      const s = Math.floor(elapsed);
+      const mm = Math.floor(s / 60);
+      const ss = String(s % 60).padStart(2, '0');
+      this.timer.textContent = `∞ ${mm}:${ss}`;
+      this.timer.classList.remove('low');
+      return;
+    }
     const s = Math.max(0, Math.ceil(seconds));
     const mm = Math.floor(s / 60);
     const ss = String(s % 60).padStart(2, '0');

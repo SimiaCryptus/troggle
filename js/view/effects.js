@@ -4,6 +4,8 @@
  * Owns view state, computes per-cube targets and pushes them into the CubeField.
  */
 import { OPACITY } from './cubes.js';
+import { getTheme, readThemePaletteFromDOM } from '../../css/themes.js';
+
 /**
  * Cubes are translucent glass on a dark background, so cube colours are tints
  * and letter colours are bright. State is never colour-only (§10): selected /
@@ -27,10 +29,11 @@ export const PALETTE = Object.freeze({
 
 export class Effects {
   /** @param {import('./cubes.js').CubeField} cubes */
-  constructor(cubes, { reducedMotion = false } = {}) {
+   constructor(cubes, { reducedMotion = false, palette = null } = {}) {
     this.cubes = cubes;
     this.grid = cubes.grid;
     this.reducedMotion = reducedMotion;
+     this.palette = palette ? { ...palette } : { ...PALETTE };
 
     this.peel = 0;
     this.peelTarget = 0;
@@ -40,6 +43,21 @@ export class Effects {
     this.cursor = -1;
     this.hint = -1;
   }
+   setPalette(palette) {
+     if (palette) this.palette = { ...this.palette, ...palette };
+   }
+   setTheme(themeId, isLight) {
+     const t = getTheme(themeId);
+     const domPalette = readThemePaletteFromDOM(t);
+     if (domPalette) {
+       this.setPalette(domPalette);
+     } else if (t?.palette) {
+       this.setPalette(t.palette);
+     } else {
+       this.setPalette(PALETTE);
+     }
+   }
+
 
   // ------------------------------------------------------------ controls
 
@@ -85,34 +103,34 @@ export class Effects {
       const isSel = selIdx >= 0;
       const isLegal = this.legal.has(i);
 
-      let color = PALETTE.base;
-      let letter = PALETTE.baseLetter;
+       let color = this.palette.base;
+       let letter = this.palette.baseLetter;
       let scale = 1;
       let glow = 0;
 
       if (isSel) {
-        color = PALETTE.selected;
-        letter = PALETTE.selectedLetter;
+         color = this.palette.selected;
+         letter = this.palette.selectedLetter;
         scale = 1.06;
         glow = 1;
       } else if (isLegal) {
-        color = PALETTE.legal;
-        letter = PALETTE.legalLetter;
+         color = this.palette.legal;
+         letter = this.palette.legalLetter;
         scale = 1.01;
         glow = 0.45;
       } else if (hasPath) {
-        color = PALETTE.dim;
-        letter = PALETTE.dimLetter;
+         color = this.palette.dim;
+         letter = this.palette.dimLetter;
       }
       if (i === this.hint) {
-        color = PALETTE.hint;
-        letter = PALETTE.hintLetter;
+         color = this.palette.hint;
+         letter = this.palette.hintLetter;
         scale = 1.08;
         glow = 1;
       }
       if (i === this.cursor && !isSel) {
-        color = PALETTE.cursor;
-        letter = PALETTE.cursorLetter;
+         color = this.palette.cursor;
+         letter = this.palette.cursorLetter;
         scale = 1.05;
         glow = 0.7;
       }

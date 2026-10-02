@@ -1,13 +1,15 @@
+@import './themes.css';
+
 :root {
-  --bg: #0b1016;
-  --bg2: #141d28;
-  --fg: #eef2f6;
-  --muted: #93a3b3;
-  --line: #24313f;
-  --accent: #2ec4b6;
-  --accent2: #ffd166;
-  --warn: #ff9f1c;
-  --bad: #ef476f;
+   --bg: var(--color-canvas, #0b1016);
+   --bg2: var(--color-surface-1, #141d28);
+   --fg: var(--color-text, #eef2f6);
+   --muted: var(--color-text-muted, #93a3b3);
+   --line: var(--color-border, #24313f);
+   --accent: var(--color-brand, #2ec4b6);
+   --accent2: var(--color-accent, #ffd166);
+   --warn: var(--color-warning, #ff9f1c);
+   --bad: var(--color-danger, #ef476f);
   --pad: 10px;
   --radius: 12px;
   font-synthesis: none;
@@ -94,7 +96,7 @@ body {
 .stage {
   position: relative;
   min-height: 0;
-  background: radial-gradient(120% 90% at 50% 20%, #1a2735 0%, var(--bg) 62%, #05080c 100%);
+   background: radial-gradient(120% 90% at 50% 20%, color-mix(in srgb, var(--color-surface-1, #1a2735) 75%, var(--bg)) 0%, var(--bg) 62%, var(--color-surface-2, #05080c) 100%);
   touch-action: none;
 }
 #board {
@@ -110,7 +112,7 @@ body {
   place-content: center;
   justify-items: center;
   gap: 12px;
-  background: rgba(6, 10, 14, 0.55);
+   background: color-mix(in srgb, var(--bg) 75%, transparent);
   backdrop-filter: blur(2px);
   z-index: 3;
   font-weight: 600;
@@ -160,7 +162,7 @@ body {
 .icon-btn {
   appearance: none;
   border: 1px solid var(--line);
-  background: rgba(20, 29, 40, 0.82);
+   background: color-mix(in srgb, var(--bg2) 85%, transparent);
   color: var(--fg);
   border-radius: 999px;
   padding: 7px 11px;
@@ -174,7 +176,7 @@ body {
 }
 .tool[aria-pressed='true'] {
   background: var(--accent);
-  color: #04231f;
+   color: var(--color-on-brand, #04231f);
   border-color: var(--accent);
   font-weight: 700;
 }
@@ -196,7 +198,7 @@ body {
   margin: 0;
   max-width: 45%;
   text-align: right;
-  color: #5d6c7c;
+   color: var(--muted);
   font-size: 0.72rem;
   pointer-events: none;
 }
@@ -247,8 +249,8 @@ body {
   height: 30px;
   padding: 0 5px;
   border-radius: 7px;
-  background: #e9dcc3;
-  color: #241f1b;
+   background: var(--color-chip, #e9dcc3);
+   color: var(--color-chip-text, #241f1b);
   font-weight: 800;
   letter-spacing: 0.02em;
 }
@@ -303,7 +305,7 @@ body {
 
 .found {
   border-top: 1px solid var(--line);
-  background: #0d141c;
+   background: var(--color-surface-2, #0d141c);
   max-height: 26dvh;
   overflow: auto;
 }
@@ -334,7 +336,7 @@ body {
   appearance: none;
   cursor: pointer;
   border: 1px solid var(--line);
-  background: #14202b;
+   background: var(--color-surface-1, #14202b);
   color: var(--fg);
   border-radius: 999px;
   padding: 4px 9px;
@@ -373,19 +375,19 @@ body {
   font: 800 0.9rem inherit;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  background: #1d2a37;
+   background: var(--color-surface-1, #1d2a37);
   color: var(--fg);
   border: 1px solid var(--line);
   animation: rise 1.6s ease-out forwards;
 }
 .toast.good {
   background: var(--accent);
-  color: #04231f;
+   color: var(--color-on-brand, #04231f);
   border-color: transparent;
 }
 .toast.warn {
   background: var(--warn);
-  color: #2a1a00;
+   color: var(--color-on-warning, #2a1a00);
   border-color: transparent;
 }
 .toast.grey {
@@ -422,7 +424,7 @@ body {
   overflow: auto;
 }
 .sheet::backdrop {
-  background: rgba(4, 7, 10, 0.68);
+   background: color-mix(in srgb, var(--bg) 70%, transparent);
   backdrop-filter: blur(3px);
 }
 .sheet h2 {
@@ -451,7 +453,7 @@ body {
   display: block;
   width: 100%;
   margin-top: 4px;
-  background: #0d141c;
+   background: var(--color-surface-2, #0d141c);
   color: var(--fg);
   border: 1px solid var(--line);
   border-radius: 9px;
@@ -470,13 +472,13 @@ body {
   font: 700 0.95rem inherit;
   border-radius: 999px;
   padding: 10px 16px;
-  background: #1d2a37;
+   background: var(--color-surface-1, #1d2a37);
   color: var(--fg);
   border: 1px solid var(--line);
 }
 .row button.primary {
   background: var(--accent);
-  color: #04231f;
+   color: var(--color-on-brand, #04231f);
   border-color: transparent;
 }
 .row button.ghost {
